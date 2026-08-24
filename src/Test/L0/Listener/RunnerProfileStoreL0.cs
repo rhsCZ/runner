@@ -136,6 +136,12 @@ namespace GitHub.Runner.Common.Tests.Listener
         private static void WriteHiddenRootConfig(string root, string fileName, string content)
         {
             var path = Path.Combine(root, fileName);
+            if (File.Exists(path))
+            {
+                File.SetAttributes(path, FileAttributes.Normal);
+                File.Delete(path);
+            }
+
             File.WriteAllText(path, content);
             File.SetAttributes(path, File.GetAttributes(path) | FileAttributes.Hidden);
         }
