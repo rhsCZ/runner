@@ -87,8 +87,7 @@ namespace GitHub.Runner.Listener.MultiRepo
                 var target = Path.Combine(root, fileName);
                 if (snapshot.Files.TryGetValue(fileName, out var bytes))
                 {
-                    File.WriteAllBytes(target, bytes);
-                    File.SetAttributes(target, File.GetAttributes(target) | FileAttributes.Hidden);
+                    ReplaceFile(target, bytes);
                 }
                 else if (File.Exists(target))
                 {
@@ -113,8 +112,7 @@ namespace GitHub.Runner.Listener.MultiRepo
                 var target = Path.Combine(profileRoot, fileName);
                 if (File.Exists(source))
                 {
-                    File.Copy(source, target, overwrite: true);
-                    File.SetAttributes(target, File.GetAttributes(target) | FileAttributes.Hidden);
+                    ReplaceFile(source, target);
                 }
                 else if (File.Exists(target))
                 {
@@ -136,8 +134,7 @@ namespace GitHub.Runner.Listener.MultiRepo
 
                 if (File.Exists(source))
                 {
-                    File.Copy(source, target, overwrite: true);
-                    File.SetAttributes(target, File.GetAttributes(target) | FileAttributes.Hidden);
+                    ReplaceFile(source, target);
                 }
                 else if (File.Exists(target))
                 {
@@ -186,6 +183,30 @@ namespace GitHub.Runner.Listener.MultiRepo
                 WellKnownConfigFile.RSACredentials => ".credentials_rsaparams",
                 _ => throw new NotSupportedException($"Unsupported profile config file '{configFile}'."),
             };
+        }
+
+        private static void ReplaceFile(string source, string target)
+        {
+            if (File.Exists(target))
+            {
+                File.SetAttributes(target, FileAttributes.Normal);
+                File.Delete(target);
+            }
+
+            File.Copy(source, target, overwrite: false);
+            File.SetAttributes(target, File.GetAttributes(target) | FileAttributes.Hidden);
+        }
+
+        private static void ReplaceFile(string target, byte[] contents)
+        {
+            if (File.Exists(target))
+            {
+                File.SetAttributes(target, FileAttributes.Normal);
+                File.Delete(target);
+            }
+
+            File.WriteAllBytes(target, contents);
+            File.SetAttributes(target, File.GetAttributes(target) | FileAttributes.Hidden);
         }
     }
 }

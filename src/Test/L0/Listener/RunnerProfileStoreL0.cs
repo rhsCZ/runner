@@ -54,6 +54,9 @@ namespace GitHub.Runner.Common.Tests.Listener
             {
                 profileRoot = CreateProfile(profilesRoot, $"{testPrefix}-repo-c", "runner-c", "token-c");
                 var profile = RunnerProfileStore.LoadProfiles(hc).Single(x => x.Name == $"{testPrefix}-repo-c");
+                WriteHiddenRootConfig(root, ".runner", "{\"AgentName\":\"existing\"}");
+                WriteHiddenRootConfig(root, ".credentials", "existing-credentials");
+                WriteHiddenRootConfig(root, ".credentials_rsaparams", "existing-rsa");
 
                 RunnerProfileStore.ActivateProfile(hc, profile);
 
@@ -128,6 +131,13 @@ namespace GitHub.Runner.Common.Tests.Listener
             File.WriteAllText(Path.Combine(profileRoot, ".credentials_rsaparams"), "rsa-placeholder");
 
             return profileRoot;
+        }
+
+        private static void WriteHiddenRootConfig(string root, string fileName, string content)
+        {
+            var path = Path.Combine(root, fileName);
+            File.WriteAllText(path, content);
+            File.SetAttributes(path, File.GetAttributes(path) | FileAttributes.Hidden);
         }
     }
 }
